@@ -4,6 +4,7 @@ from .database import SessionLocal
 from .services import DatabaseService
 from .schemas import PerevalAddedCreate, PerevalImagesCreate, PerevalAddedResponse
 from .models import Coords, PerevalImages
+from typing import List
 
 app = FastAPI()
 
@@ -20,7 +21,11 @@ async def submit_data(pereval_data: PerevalAddedCreate, db: Session = Depends(ge
     try:
         db_service = DatabaseService(db)
 
-        user = db_service.create_user(pereval_data.user)
+        user = db_service.get_user_by_email(pereval_data.user.email)
+
+        if not user:
+            user = db_service.create_user(pereval_data.user)
+
         coords = db_service.create_coords(pereval_data.coords)
         
         pereval = db_service.create_pereval(
@@ -56,7 +61,6 @@ async def get_pereval(id: int, db: Session = Depends(get_db)):
         pereval = db_service.get_pereval_by_id(id)
         
         if not pereval:
-            print(f"Перевал с ID {id} не найден")
             return {
                 "status": 404,
                 "message": f"Перевал с ID {id} не найден",
@@ -145,4 +149,29 @@ async def update_pereval(id: int, pereval_data: PerevalAddedCreate, db: Session 
         return {
             "state": 0,
             "message": f"Ошибка при обновлении перевала: {str(e)}",
+        }
+    
+@app.get("/submitData/", response_model=List[PerevalAddedResponse])
+async def get_pereval_by_user(user_email: str, db: Session = Depends(get_db)):
+    """
+    Получить перевал по email пользователя.
+    """
+    try:
+        db_service = DatabaseService(db)
+        perevals = db_service.get_pereval_by_email(user_email)
+
+        if not perevals:
+            return {
+                "status": 404,
+                "message": "Перевал не найден",
+                "user_email": user_email
+            }
+
+        return perevals  
+
+    except Exception as e:
+        return {
+            "status": 500,
+            "message": f"Ошибка при выполнении операции: {str(e)}",
+            "user_email": user_email
         }

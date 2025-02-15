@@ -56,5 +56,15 @@ class DatabaseService:
         self.db.refresh(db_pereval_images)
         return db_pereval_images
     
+    def get_user_by_email(self, email: str):
+        return self.db.query(models.User).filter(models.User.email == email).first()
+    
     def get_pereval_by_id(self, pereval_id: int):
         return self.db.query(models.PerevalAdded).filter(models.PerevalAdded.id == pereval_id).first()
+    
+    def get_pereval_by_email(self, user_email: str):
+        user = self.db.query(models.User).filter(models.User.email == user_email).first()
+        if user:
+            perevals = self.db.query(models.PerevalAdded).filter(models.PerevalAdded.user_id == user.id).all()
+            return perevals
+        return None
