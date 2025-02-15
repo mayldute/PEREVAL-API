@@ -74,7 +74,6 @@ class PerevalAddedCreate(BaseModel):
 
 class PerevalAddedResponse(PerevalAddedCreate):
     id: int
-    date_added: datetime
     add_time: datetime
     status: str
 

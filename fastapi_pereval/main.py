@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
 from .database import SessionLocal
 from .services import DatabaseService
-from .schemas import PerevalAddedCreate, PerevalImagesCreate
+from .schemas import PerevalAddedCreate, PerevalImagesCreate, PerevalAddedResponse
 
 app = FastAPI()
 
@@ -41,6 +41,30 @@ async def submit_data(pereval_data: PerevalAddedCreate, db: Session = Depends(ge
         }
 
     except Exception as e:
+        return {
+            "status": 500,
+            "message": f"Ошибка при выполнении операции: {str(e)}",
+            "id": None
+        }
+
+@app.get("/submitData/{id}", response_model=PerevalAddedResponse)
+async def get_pereval(id: int, db: Session = Depends(get_db)):
+    try:
+        db_service = DatabaseService(db)
+
+        pereval = db_service.get_pereval_by_id(id)
+        
+        if not pereval:
+            print(f"Перевал с ID {id} не найден")
+            return {
+                "status": 404,
+                "message": f"Перевал с ID {id} не найден",
+                "id": None
+            }
+        return pereval
+
+    except Exception as e:
+        print(f"Ошибка при выполнении запроса: {str(e)}")
         return {
             "status": 500,
             "message": f"Ошибка при выполнении операции: {str(e)}",

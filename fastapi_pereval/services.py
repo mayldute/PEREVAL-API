@@ -55,3 +55,6 @@ class DatabaseService:
         self.db.commit()
         self.db.refresh(db_pereval_images)
         return db_pereval_images
+    
+    def get_pereval_by_id(self, pereval_id: int):
+        return self.db.query(models.PerevalAdded).filter(models.PerevalAdded.id == pereval_id).first()
