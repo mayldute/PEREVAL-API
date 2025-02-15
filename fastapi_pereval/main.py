@@ -1,15 +1,12 @@
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
-from .database import SessionLocal
-from .services import DatabaseService
-from .schemas import PerevalAddedCreate, PerevalImagesCreate, PerevalAddedResponse
-from .models import Coords, PerevalImages
 from typing import List
+from . import database, services, schemas, models
 
 app = FastAPI()
 
 def get_db():
-    db = SessionLocal()
+    db = database.SessionLocal()
     try:
         yield db
     finally:
@@ -17,9 +14,10 @@ def get_db():
 
 
 @app.post("/submitData")
-async def submit_data(pereval_data: PerevalAddedCreate, db: Session = Depends(get_db)):
+async def submit_data(pereval_data: schemas.PerevalAddedCreate, db: Session = Depends(get_db)):
+    """Create a new pereval in the database"""
     try:
-        db_service = DatabaseService(db)
+        db_service = services.DatabaseService(db)
 
         user = db_service.get_user_by_email(pereval_data.user.email)
 
@@ -36,63 +34,65 @@ async def submit_data(pereval_data: PerevalAddedCreate, db: Session = Depends(ge
         
         if pereval_data.images:
             for image_data in pereval_data.images:
-                image_dict = image_data.dict()  
+                image_dict = image_data.model_dump()  
                 image_dict["pereval_id"] = pereval.id
-                db_service.create_pereval_images(PerevalImagesCreate(**image_dict))
+                db_service.create_pereval_images(schemas.PerevalImagesCreate(**image_dict))
         
         return {
             "status": 200,
-            "message": "Перевал успешно создан",
+            "message": "Pereval successfully created",
             "id": pereval.id
         }
 
     except Exception as e:
         return {
             "status": 500,
-            "message": f"Ошибка при выполнении операции: {str(e)}",
+            "message": f"Error during operation: {str(e)}",
             "id": None
         }
 
-@app.get("/submitData/{id}", response_model=PerevalAddedResponse)
+@app.get("/submitData/{id}", response_model=schemas.PerevalAddedResponse)
 async def get_pereval(id: int, db: Session = Depends(get_db)):
+    """Get pereval by ID"""
     try:
-        db_service = DatabaseService(db)
+        db_service = services.DatabaseService(db)
 
         pereval = db_service.get_pereval_by_id(id)
         
         if not pereval:
             return {
                 "status": 404,
-                "message": f"Перевал с ID {id} не найден",
+                "message": f"Pereval with ID {id} not found",
                 "id": None
             }
         return pereval
 
     except Exception as e:
-        print(f"Ошибка при выполнении запроса: {str(e)}")
+        print(f"Error during request execution: {str(e)}")
         return {
             "status": 500,
-            "message": f"Ошибка при выполнении операции: {str(e)}",
+            "message": f"Error during operation: {str(e)}",
             "id": None
         }
     
 @app.patch("/submitData/{id}")
-async def update_pereval(id: int, pereval_data: PerevalAddedCreate, db: Session = Depends(get_db)):
+async def update_pereval(id: int, pereval_data: schemas.PerevalAddedCreate, db: Session = Depends(get_db)):
+    """Update pereval by ID"""
     try:
-        db_service = DatabaseService(db)
+        db_service = services.DatabaseService(db)
 
         db_pereval = db_service.get_pereval_by_id(id)
         
         if not db_pereval:
             return {
                 "state": 0,
-                "message": f"Перевал с ID {id} не найден",
+                "message": f"Pereval with ID {id} not found",
             }
 
         if db_pereval.status != "new":
             return {
                 "state": 0,
-                "message": "Перевал в статусе не 'new', редактировать нельзя.",
+                "message": "Pereval is not in 'new' status, editing is not allowed.",
             }
 
         if pereval_data.title is not None:
@@ -115,7 +115,7 @@ async def update_pereval(id: int, pereval_data: PerevalAddedCreate, db: Session 
             db_pereval.spring_level = pereval_data.spring_level
 
         if pereval_data.coords is not None:
-            coords = db.query(Coords).filter(Coords.id == db_pereval.coord_id).first()
+            coords = db.query(models.Coords).filter(models.Coords.id == db_pereval.coord_id).first()
 
             coords.latitude = pereval_data.coords.latitude
             coords.longitude = pereval_data.coords.longitude
@@ -125,11 +125,11 @@ async def update_pereval(id: int, pereval_data: PerevalAddedCreate, db: Session 
 
 
         if pereval_data.images is not None:
-            db.query(PerevalImages).filter(PerevalImages.pereval_id == id).delete()
+            db.query(models.PerevalImages).filter(models.PerevalImages.pereval_id == id).delete()
             db.commit()
 
             for image_data in pereval_data.images:
-                new_image = PerevalImages(
+                new_image = models.PerevalImages(
                     pereval_id=id,
                     img_title=image_data.img_title,
                     img=image_data.img,
@@ -142,28 +142,26 @@ async def update_pereval(id: int, pereval_data: PerevalAddedCreate, db: Session 
 
         return {
             "state": 1,
-            "message": "Перевал успешно отредактирован",
+            "message": "Pereval successfully updated",
         }
 
     except Exception as e:
         return {
             "state": 0,
-            "message": f"Ошибка при обновлении перевала: {str(e)}",
+            "message": f"Error updating pereval: {str(e)}",
         }
     
-@app.get("/submitData/", response_model=List[PerevalAddedResponse])
+@app.get("/submitData/", response_model=List[schemas.PerevalAddedResponse])
 async def get_pereval_by_user(user_email: str, db: Session = Depends(get_db)):
-    """
-    Получить перевал по email пользователя.
-    """
+    """Get perevals by user email"""
     try:
-        db_service = DatabaseService(db)
+        db_service = services.DatabaseService(db)
         perevals = db_service.get_pereval_by_email(user_email)
 
         if not perevals:
             return {
                 "status": 404,
-                "message": "Перевал не найден",
+                "message": "Pereval not found",
                 "user_email": user_email
             }
 
@@ -172,6 +170,6 @@ async def get_pereval_by_user(user_email: str, db: Session = Depends(get_db)):
     except Exception as e:
         return {
             "status": 500,
-            "message": f"Ошибка при выполнении операции: {str(e)}",
+            "message": f"Error during operation: {str(e)}",
             "user_email": user_email
         }

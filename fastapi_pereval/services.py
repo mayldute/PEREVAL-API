@@ -8,7 +8,7 @@ class DatabaseService:
 
     def create_user(self, user_data: schemas.UserCreate):
         """Create a new user in the database"""
-        db_user = models.User(**user_data.dict())
+        db_user = models.User(**user_data.model_dump())
         self.db.add(db_user)
         self.db.commit()
         self.db.refresh(db_user)
@@ -16,7 +16,7 @@ class DatabaseService:
     
     def create_coords(self, coords_data: schemas.CoordsCreate):
         """Create a new coords in the database"""
-        db_coords = models.Coords(**coords_data.dict())
+        db_coords = models.Coords(**coords_data.model_dump())
         self.db.add(db_coords)
         self.db.commit()
         self.db.refresh(db_coords)
@@ -57,12 +57,15 @@ class DatabaseService:
         return db_pereval_images
     
     def get_user_by_email(self, email: str):
+        """Get a user by email"""
         return self.db.query(models.User).filter(models.User.email == email).first()
     
     def get_pereval_by_id(self, pereval_id: int):
+        """Get a pereval by id"""
         return self.db.query(models.PerevalAdded).filter(models.PerevalAdded.id == pereval_id).first()
     
     def get_pereval_by_email(self, user_email: str):
+        """Get a perevals by email"""
         user = self.db.query(models.User).filter(models.User.email == user_email).first()
         if user:
             perevals = self.db.query(models.PerevalAdded).filter(models.PerevalAdded.user_id == user.id).all()

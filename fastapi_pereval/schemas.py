@@ -1,24 +1,23 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr,  ConfigDict
 from typing import List, Optional
 from datetime import datetime
 
 
 class UserCreate(BaseModel):
-    email: str
+    email: EmailStr
     phone: str
     fam: str
     name: str
     otc: Optional[str] = None
 
-    class Config:
-        orm_mode = True
-
+    class Config(ConfigDict): 
+        from_attributes = True 
 
 class UserResponse(UserCreate):
     id: int
 
-    class Config:
-        orm_mode = True
+    class Config(ConfigDict): 
+        from_attributes = True 
 
 
 class CoordsCreate(BaseModel):
@@ -26,15 +25,15 @@ class CoordsCreate(BaseModel):
     longitude: float
     height: int
 
-    class Config:
-        orm_mode = True
+    class Config(ConfigDict): 
+        from_attributes = True 
 
 
 class CoordsResponse(CoordsCreate):
     id: int
 
-    class Config:
-        orm_mode = True
+    class Config(ConfigDict): 
+        from_attributes = True 
 
 
 class PerevalImagesCreate(BaseModel):
@@ -42,15 +41,15 @@ class PerevalImagesCreate(BaseModel):
     img_title: Optional[str] = None
     img: str  
 
-    class Config:
-        orm_mode = True
+    class Config(ConfigDict): 
+        from_attributes = True 
 
 
 class PerevalImagesResponse(PerevalImagesCreate):
     id: int
 
-    class Config:
-        orm_mode = True
+    class Config(ConfigDict): 
+        from_attributes = True 
 
 
 class PerevalAddedCreate(BaseModel):
@@ -68,9 +67,9 @@ class PerevalAddedCreate(BaseModel):
 
     images: List[PerevalImagesCreate] = []
 
-    class Config:
-        orm_mode = True
-
+    class Config(ConfigDict): 
+        from_attributes = True 
+        
 
 class PerevalAddedResponse(PerevalAddedCreate):
     id: int
@@ -90,7 +89,7 @@ class PerevalAddedResponse(PerevalAddedCreate):
     coords: CoordsResponse
     images: List[PerevalImagesResponse]
 
-    class Config:
-        orm_mode = True
+    class Config(ConfigDict): 
+        from_attributes = True 
 
 
