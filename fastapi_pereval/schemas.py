@@ -77,6 +77,15 @@ class PerevalAddedResponse(PerevalAddedCreate):
     add_time: datetime
     status: str
 
+    title: str
+    beauty_title: str
+    other_titles: str
+    connect: str
+    winter_level: str
+    summer_level: str
+    autumn_level: str
+    spring_level: str
+
     user: UserResponse
     coords: CoordsResponse
     images: List[PerevalImagesResponse]
