@@ -21,7 +21,7 @@ class UserResponse(UserCreate):
         orm_mode = True
 
 
-class CoordsBase(BaseModel):
+class CoordsCreate(BaseModel):
     latitude: float
     longitude: float
     height: int
@@ -30,7 +30,23 @@ class CoordsBase(BaseModel):
         orm_mode = True
 
 
-class CoordsResponse(CoordsBase):
+class CoordsResponse(CoordsCreate):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+
+class PerevalImagesCreate(BaseModel):
+    pereval_id: Optional[int] = None
+    img_title: Optional[str] = None
+    img: str  
+
+    class Config:
+        orm_mode = True
+
+
+class PerevalImagesResponse(PerevalImagesCreate):
     id: int
 
     class Config:
@@ -38,16 +54,19 @@ class CoordsResponse(CoordsBase):
 
 
 class PerevalAddedCreate(BaseModel):
-    user_id: int
-    coord_id: int
     beauty_title: Optional[str] = None
     title: str
     other_titles: Optional[str] = None
     connect: Optional[str] = None
+    add_time: datetime
+    user: UserCreate
+    coords: CoordsCreate
     winter_level: Optional[str] = None
     summer_level: Optional[str] = None
     autumn_level: Optional[str] = None
     spring_level: Optional[str] = None
+
+    images: List[PerevalImagesCreate] = []
 
     class Config:
         orm_mode = True
@@ -61,52 +80,7 @@ class PerevalAddedResponse(PerevalAddedCreate):
 
     user: UserResponse
     coords: CoordsResponse
-    images: List["PerevalImagesResponse"]
-
-    class Config:
-        orm_mode = True
-
-
-class PerevalImagesCreate(BaseModel):
-    pereval_id: int
-    img_title: Optional[str] = None
-    img: str
-
-    class Config:
-        orm_mode = True
-
-
-class PerevalImagesResponse(PerevalImagesCreate):
-    id: int
-
-    class Config:
-        orm_mode = True
-
-
-class PerevalAreasCreate(BaseModel):
-    id_parent: Optional[int] = None
-    title: str
-
-    class Config:
-        orm_mode = True
-
-
-class PerevalAreasResponse(PerevalAreasCreate):
-    id: int
-
-    class Config:
-        orm_mode = True
-
-
-class SprActivitiesTypesCreate(BaseModel):
-    title: str
-
-    class Config:
-        orm_mode = True
-
-
-class SprActivitiesTypesResponse(SprActivitiesTypesCreate):
-    id: int
+    images: List[PerevalImagesResponse]
 
     class Config:
         orm_mode = True

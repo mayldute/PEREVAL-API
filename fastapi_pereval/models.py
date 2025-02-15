@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Float, TIMESTAMP, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from database import Base
+from .database import Base
 
 
 class User(Base):
@@ -32,7 +32,6 @@ class PerevalAdded(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     coord_id = Column(Integer, ForeignKey("coords.id"))
-    date_added = Column(TIMESTAMP, default=func.now())
 
     beauty_title = Column(String, nullable=True)
     title = Column(String, nullable=False)
