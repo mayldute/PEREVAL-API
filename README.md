@@ -1,6 +1,8 @@
+##TourPass API
+
 This project implements a REST API for working with pass data. The API allows users to add, retrieve, update pass information, and interact with user data and images. The project uses FastAPI to create the API and SQLAlchemy with PostgreSQL to work with the database.
 
-API Features
+##API Features
 
 The API provides the following features:
 
@@ -10,7 +12,7 @@ The API provides the following features:
 - Retrieving passes by user email.
 - Working with pass images.
 
-Technologies
+##Technologies
 
 - FastAPI – for creating the API.
 - SQLAlchemy – for working with the database.
@@ -18,7 +20,7 @@ Technologies
 - Pydantic – for data validation.
 - Swagger – for auto-generating API documentation.
 
-How to Deploy the Project
+##How to Deploy the Project
 
 1. Install Dependencies
 To install the dependencies, run the command:
@@ -56,7 +58,7 @@ uvicorn main:app --reload
 
 After that, the server will be available at `http://localhost:8000`.
 
-Deployment Using Docker
+##Deployment Using Docker
 
 1. Clone the Repository
 First, clone the repository to your machine:
@@ -82,7 +84,7 @@ docker run -d -p 8000:8000 pereval-api
 
 This will create and run the container, which will be available at `http://localhost:8000`.
 
-How to Use the API
+##How to Use the API
 
 1. Adding a New Pass
 `POST /submitData`
@@ -242,7 +244,7 @@ Example response:
 ]
 ```
 
-Swagger Documentation
+##Swagger Documentation
 
 FastAPI automatically generates API documentation using Swagger. To view it, simply go to the following URL:
 
@@ -250,7 +252,7 @@ FastAPI automatically generates API documentation using Swagger. To view it, sim
 
 This page provides a visual interface for testing the API.
 
-Test Coverage
+##Test Coverage
 
 The project includes unit tests to verify the functionality of database interaction methods and API testing. The tests include:
 
